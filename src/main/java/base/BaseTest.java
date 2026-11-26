@@ -9,6 +9,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import java.lang.reflect.Method;
@@ -30,16 +31,23 @@ public class BaseTest {
     }
 
     @BeforeMethod
-    public void setup (Method method){
+    public void setup(Method method){
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+
+        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
+        ChromeOptions options = new ChromeOptions();
+        if (headless) {
+            options.addArguments("--headless=new", "--window-size=1920,1080");
+        }
+        driver = new ChromeDriver(options);
+        if (!headless) {
+            driver.manage().window().maximize();
+        }
         driver.get("https://opensource-demo.orangehrmlive.com");
 
         // Create test entry in report with method name
         test = extent.createTest(method.getName());
-      }
+    }
 
       @AfterMethod
       public void teardown(ITestResult result) {
